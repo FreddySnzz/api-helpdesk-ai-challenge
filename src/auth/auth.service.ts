@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { ReturnLoginDto, ReturnRegisterDto } from './dto/return-auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,7 @@ export class AuthService {
 
   async login(
     data: LoginDto
-  ) {
+  ): Promise<ReturnLoginDto> {
     const user = await this.prisma.user.findUnique(
       { 
         where: { 
@@ -50,7 +51,7 @@ export class AuthService {
 
   async register(
     data: RegisterDto
-  ) {
+  ): Promise<ReturnRegisterDto> {
     const userExists = await this.prisma.user.findUnique(
       { 
         where: { 
