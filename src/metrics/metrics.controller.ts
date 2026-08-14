@@ -9,11 +9,21 @@ import { mergeMap } from 'rxjs/operators';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MetricsService } from './metrics.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { 
+  ApiBearerAuth, 
+  ApiOkResponse, 
+  ApiOperation, 
+  ApiResponse, 
+  ApiTags 
+} from '@nestjs/swagger';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @ApiTags('Metrics')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
 @Controller('metrics')
 export class MetricsController {
   constructor(
@@ -33,6 +43,10 @@ export class MetricsController {
   @ApiResponse({ 
     status: 401, 
     description: 'Não autorizado (Token inválido).' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Não autorizado (Usuário não possui permissão para acessar a rota).'
   })
   async getInitialMetrics() {
     return this.metricsService.getDashboardData();

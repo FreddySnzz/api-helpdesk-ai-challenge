@@ -2,7 +2,8 @@ import {
   Injectable, 
   ForbiddenException, 
   BadRequestException, 
-  NotFoundException 
+  NotFoundException,
+  ConflictException
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
@@ -13,6 +14,7 @@ import { ReturnTicketDto } from './dto/return-ticket.dto';
 import { ReturnCommentDto } from './dto/return-comment.dto';
 import { AiAgentService } from '../ai-agent/ai-agent.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import * as stringSimilarity from 'string-similarity';
 
 @Injectable()
 export class TicketService {
@@ -26,8 +28,31 @@ export class TicketService {
     userId: string, 
     data: CreateTicketDto
   ): Promise<ReturnTicketDto> {
-    const classification = await this.aiAgentService.classifyTicket(data.title, data.description);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
 
+    const recentTickets = await this.prisma.ticket.findMany({
+      where: {
+        authorId: userId,
+        createdAt: { gte: yesterday },
+      },
+      select: { description: true },
+    });
+
+    if (recentTickets.length > 0) {
+      const descriptions = recentTickets.map((t) => t.description.toLowerCase());
+      const newDescription = data.description.toLowerCase();
+
+      const match = stringSimilarity.findBestMatch(newDescription, descriptions);
+
+      if (match.bestMatch.rating > 0.8) {
+        throw new ConflictException(
+          'Você já abriu um chamado muito similar recentemente. Por favor, aguarde o atendimento ou adicione um comentário ao chamado existente.'
+        )
+      }
+    }
+
+    const classification = await this.aiAgentService.classifyTicket(data.title, data.description);
     const ticket = await this.prisma.ticket.create({
       data: {
         title: data.title,

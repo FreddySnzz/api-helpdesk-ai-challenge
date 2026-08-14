@@ -46,6 +46,10 @@ export class TicketController {
     status: 401, 
     description: 'Não autorizado (Token inválido).' 
   })
+  @ApiResponse({ 
+    status: 409, 
+    description: 'Já existe um chamado muito similar recentemente. Por favor, aguarde o atendimento ou adicione um comentário ao chamado existente.'
+  })
   async create(
     @CurrentUser() user: User, 
     @Body() createTicketDto: CreateTicketDto
