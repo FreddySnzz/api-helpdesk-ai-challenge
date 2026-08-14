@@ -1,7 +1,6 @@
-version: '3.8'
 services:
   db:
-    image: postgres:15-alpine
+    image: postgres:15
     container_name: helpdesk-db
     environment:
       POSTGRES_USER: admin
@@ -10,7 +9,28 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d helpdesk"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: . 
+    container_name: helpdesk-api
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: "postgresql://admin:adminpassword@db:5432/helpdesk?schema=public"
+      PORT: 8080
+      GEMINI_API_KEY: "${GEMINI_API_KEY}" 
+      JWT_SECRET: "minha-chave-secreta-super-segura-123"
+    depends_on:
+      db:
+        condition: service_healthy 
+    command: >
+      sh -c "npx prisma migrate deploy && npx prisma db seed && (node dist/src/main || node dist/main)"
 
 volumes:
-  pgdata:
+  postgres_data:

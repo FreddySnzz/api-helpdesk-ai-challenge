@@ -21,7 +21,10 @@ import { TicketService } from './ticket.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ReturnTicketDto } from './dto/return-ticket.dto';
 import { ReturnCommentDto } from './dto/return-comment.dto';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Ticket')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('ticket')
 export class TicketController {
@@ -31,6 +34,18 @@ export class TicketController {
 
   @UsePipes(ValidationPipe)
   @Post()
+  @ApiOperation({ 
+    summary: 'Cria um novo chamado', 
+    description: 'A IA fará a triagem automática baseada na descrição.' 
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Chamado criado e triado com sucesso.' 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado (Token inválido).' 
+  })
   async create(
     @CurrentUser() user: User, 
     @Body() createTicketDto: CreateTicketDto
@@ -39,6 +54,18 @@ export class TicketController {
   }
 
   @Get()
+  @ApiOperation({ 
+    summary: 'Retorna todos os chamados',
+    description: 'Retorna todos os chamados com status informado.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Chamados encontrados e retornados com sucesso.'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado (Token inválido).' 
+  })
   async findAll(
     @CurrentUser() user: User, 
     @Query('status') status?: Status
@@ -47,6 +74,18 @@ export class TicketController {
   }
 
   @Get(':id')
+  @ApiOperation({ 
+    summary: 'Retorna um chamado específico',
+    description: 'Retorna o chamado informado e seus comentários.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Chamado encontrado e retornado com sucesso.'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado (Token inválido).' 
+  })
   async findOne(
     @Param('id') id: string, 
     @CurrentUser() user: User
@@ -55,6 +94,18 @@ export class TicketController {
   }
 
   @Patch(':id')
+  @ApiOperation({ 
+    summary: 'Atualiza as informações do chamado',
+    description: 'Atualiza o status, prioridade, categoria ou define o responsável pelo chamado.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Chamado atualizado com sucesso.'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado (Token inválido).' 
+  })
   async update(
     @Param('id') id: string, 
     @Body() updateTicketDto: UpdateTicketDto, 
@@ -64,14 +115,38 @@ export class TicketController {
   }
 
   @Delete(':id')
+  @ApiOperation({ 
+    summary: 'Deleta um chamado',
+    description: 'Deleta o chamado informado.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Chamado deletado com sucesso.'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado (Token inválido).' 
+  })
   async remove(
     @Param('id') id: string, 
     @CurrentUser() user: User
-  ): Promise<ReturnTicketDto> {
+  ): Promise<void> {
     return this.ticketsService.remove(id, user);
   }
 
   @Post(':id/comments')
+  @ApiOperation({ 
+    summary: 'Cria um novo comentário no chamado',
+    description: 'Adiciona um comentário no chamado informado.'
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Comentário criado com sucesso.'
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Não autorizado (Token inválido).' 
+  })
   async addComment(
     @Param('id') ticketId: string,
     @CurrentUser() user: User,

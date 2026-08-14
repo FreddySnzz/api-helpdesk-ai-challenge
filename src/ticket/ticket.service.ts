@@ -144,14 +144,14 @@ export class TicketService {
   async remove(
     id: string, 
     user: User
-  ): Promise<ReturnTicketDto> {
+  ): Promise<void> {
     const ticket = await this.findOne(id, user);
     
     if (user.role === Role.SOLICITANTE && ticket.status !== Status.ABERTO) {
       throw new BadRequestException('Você só pode cancelar chamados que ainda estão ABERTOS');
     }
 
-    return this.prisma.ticket.delete({ 
+    await this.prisma.ticket.delete({ 
       where: { id } 
     });
   }

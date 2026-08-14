@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { UserModule } from './user/user.module';
 import { TicketModule } from './ticket/ticket.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -9,7 +8,6 @@ import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
-    UserModule, 
     TicketModule, 
     AuthModule, 
     PrismaModule, 
