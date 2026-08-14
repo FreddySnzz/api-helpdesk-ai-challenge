@@ -33,6 +33,7 @@ export class TicketService {
         authorId: userId,
         category: classification.category,
         priority: classification.priority,
+        isAiClassified: classification.isAiClassified,
       },
     });
   }

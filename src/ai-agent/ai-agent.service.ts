@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Priority } from '@prisma/client';
 
 export interface AiAgentClassification {
+  isAiClassified: boolean;
   category: string;
   priority: Priority;
 }
@@ -34,7 +35,7 @@ export class AiAgentService {
 
     try {
       const model = this.genAI.getGenerativeModel({ 
-        model: 'gemini-1.5-flash',
+        model: 'gemini-3.5-flash-lite',
         generationConfig: { responseMimeType: 'application/json' }
       });
 
@@ -57,6 +58,7 @@ export class AiAgentService {
       const priority = priorityMap[parsed.priority?.toUpperCase()] || Priority.MEDIA;
 
       return { 
+        isAiClassified: true,
         category: parsed.category || 'Geral', 
         priority 
       }
@@ -74,17 +76,20 @@ export class AiAgentService {
     
     if (content.includes('urgente') || content.includes('quebrou') || content.includes('parou') || content.includes('travado')) {
       return { 
+        isAiClassified: false,
         category: 'Hardware/Crítico', 
         priority: Priority.ALTA 
       }
     } else if (content.includes('senha') || content.includes('acesso') || content.includes('login') || content.includes('email')) {
       return { 
+        isAiClassified: false,
         category: 'Acessos', 
         priority: Priority.MEDIA 
       }
     }
     
     return { 
+      isAiClassified: false,
       category: 'Dúvidas/Geral', 
       priority: Priority.BAIXA 
     }
