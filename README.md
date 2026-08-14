@@ -25,11 +25,16 @@ Este projeto resolve dois grandes problemas de suporte: Triagem lenta e Falta de
 O projeto está totalmente containerizado. Você precisa ter apenas o Docker e o Docker Compose instalados na máquina.
 
 Passo 1: Clone o repositório
-```$ git clone <url-do-seu-repositorio>```
-```$ cd api-helpdesk-ai-challenge```
+```bash
+$ git clone <url-do-seu-repositorio>
+```
+
+```bash
+$ cd api-helpdesk-ai-challenge
+```
 
 Passo 2: Configure as Variáveis de Ambiente
-Crie um arquivo ".env" na raiz do projeto com o seguinte conteúdo:
+Crie um arquivo ".env" na raiz do projeto com o seguinte conteúdo ou copie do ".env.example":
 
 ```
 DATABASE_URL="postgresql://admin:adminpassword@db:5432/helpdesk?schema=public"
@@ -42,14 +47,18 @@ GEMINI_API_KEY="sua_chave_da_api_do_google"
 > Mock/Heurística automaticamente.
 
 Passo 3: Suba a Aplicação (One-Click Deploy)
-```$ docker-compose up --build -d```
+```bash
+$ docker-compose up --build -d
+```
 
 > O Docker irá compilar a aplicação NestJS, subir o PostgreSQL, aplicar
 > as migrations do banco e injetar os usuários de teste automaticamente
 > (Seed).
 
 Aguarde alguns segundos e acompanhe os logs para confirmar o sucesso:
-```$ docker-compose logs -f api```
+```bash
+$ docker-compose logs -f api
+```
 
 A API estará rodando em: http://localhost:8080
 
