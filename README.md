@@ -40,6 +40,7 @@ Crie um arquivo ".env" na raiz do projeto com o seguinte conteúdo ou copie do "
 DATABASE_URL="postgresql://admin:adminpassword@db:5432/helpdesk?schema=public"
 JWT_SECRET="sua-chave-secreta-jwt-aqui"
 GEMINI_API_KEY="sua_chave_da_api_do_google"
+PORT=8080
 ```
 
 > Nota sobre a IA: Caso não possua a GEMINI_API_KEY, o sistema NÃO irá
