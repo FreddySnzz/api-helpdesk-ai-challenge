@@ -12,12 +12,14 @@ import { Status, Role, User } from '@prisma/client';
 import { ReturnTicketDto } from './dto/return-ticket.dto';
 import { ReturnCommentDto } from './dto/return-comment.dto';
 import { AiAgentService } from '../ai-agent/ai-agent.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class TicketService {
   constructor(
     private prisma: PrismaService,
-    private aiAgentService: AiAgentService
+    private aiAgentService: AiAgentService,
+    private eventEmitter: EventEmitter2
   ) {}
 
   async create(
@@ -26,7 +28,7 @@ export class TicketService {
   ): Promise<ReturnTicketDto> {
     const classification = await this.aiAgentService.classifyTicket(data.title, data.description);
 
-    return this.prisma.ticket.create({
+    const ticket = await this.prisma.ticket.create({
       data: {
         title: data.title,
         description: data.description,
@@ -36,6 +38,11 @@ export class TicketService {
         isAiClassified: classification.isAiClassified,
       },
     });
+
+    this.eventEmitter.emit('ticket.changed', 
+      { action: 'CREATED', ticket }
+    );
+    return ticket;
   }
 
   async findAll(
@@ -123,10 +130,15 @@ export class TicketService {
       delete updateData.category;
     }
 
-    return this.prisma.ticket.update({
+    const updatedTicket = await this.prisma.ticket.update({
       where: { id },
       data: updateData,
     });
+
+    this.eventEmitter.emit('ticket.changed', 
+      { action: 'UPDATED', ticket: updatedTicket }
+    );
+    return updatedTicket;
   }
 
   async remove(
