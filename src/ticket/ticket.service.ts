@@ -11,23 +11,28 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { Status, Role, User } from '@prisma/client';
 import { ReturnTicketDto } from './dto/return-ticket.dto';
 import { ReturnCommentDto } from './dto/return-comment.dto';
+import { AiAgentService } from '../ai-agent/ai-agent.service';
 
 @Injectable()
 export class TicketService {
   constructor(
-    private prisma: PrismaService
+    private prisma: PrismaService,
+    private aiAgentService: AiAgentService
   ) {}
 
   async create(
     userId: string, 
     data: CreateTicketDto
   ): Promise<ReturnTicketDto> {
+    const classification = await this.aiAgentService.classifyTicket(data.title, data.description);
+
     return this.prisma.ticket.create({
       data: {
         title: data.title,
         description: data.description,
         authorId: userId,
-        category: 'Default Category',
+        category: classification.category,
+        priority: classification.priority,
       },
     });
   }
