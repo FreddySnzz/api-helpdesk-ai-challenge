@@ -125,6 +125,11 @@ export class TicketService {
             name: true, 
             email: true 
           } 
+        },
+        assignee: { 
+          select: { 
+            name: true 
+          }
         }
       },
     });
@@ -155,6 +160,41 @@ export class TicketService {
       delete updateData.category;
     }
 
+    if (updateData.status) {
+      await this.addComment(
+        id, 
+        user.id, 
+        { text: `O status do chamado foi alterado de ${ticket.status} para ${updateData.status}.` }, 
+        user
+      );
+    } else if (updateData.priority) {
+      await this.addComment(
+        id, 
+        user.id, 
+        { text: `A prioridade do chamado foi alterada de ${ticket.priority} para ${updateData.priority}.` }, 
+        user
+      );
+    } else if (updateData.category) {
+      await this.addComment(
+        id, 
+        user.id, 
+        { text: `A categoria do chamado foi alterada de ${ticket.category} para ${updateData.category}.` }, 
+        user
+      );
+    } else if (updateData.assigneeId) {
+      const assignee = await this.prisma.user.findUnique({
+        where: { id: updateData.assigneeId },
+        select: { name: true },
+      });
+
+      await this.addComment(
+        id, 
+        user.id, 
+        { text: `O responsável pelo chamado foi alterado de "Não atribuído" para ${assignee?.name ?? null}.` },
+        user
+      );
+    }
+
     const updatedTicket = await this.prisma.ticket.update({
       where: { id },
       data: updateData,
@@ -183,7 +223,7 @@ export class TicketService {
 
   async addComment(
     ticketId: string, 
-    userId: string, 
+    authorId: string, 
     data: CreateCommentDto, 
     user: User
   ): Promise<ReturnCommentDto> {
@@ -197,7 +237,7 @@ export class TicketService {
       data: {
         text: data.text,
         ticketId,
-        authorId: userId,
+        authorId,
       },
       include: { 
         author: { 

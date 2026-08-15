@@ -90,6 +90,10 @@ export class TicketController {
     status: 401, 
     description: 'Não autorizado (Token inválido).' 
   })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Chamado não encontrado.'
+  })
   async findOne(
     @Param('id') id: string, 
     @CurrentUser() user: User
@@ -100,7 +104,8 @@ export class TicketController {
   @Patch(':id')
   @ApiOperation({ 
     summary: 'Atualiza as informações do chamado',
-    description: 'Atualiza o status, prioridade, categoria ou define o responsável pelo chamado.'
+    description: `Atualiza o status, prioridade, categoria ou define o responsável pelo chamado. 
+      Após a alteração, um comentário será adicionado informando o que foi alterado.`
   })
   @ApiResponse({ 
     status: 200, 
@@ -109,6 +114,10 @@ export class TicketController {
   @ApiResponse({ 
     status: 401, 
     description: 'Não autorizado (Token inválido).' 
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Chamado não encontrado.'
   })
   async update(
     @Param('id') id: string, 
@@ -131,6 +140,10 @@ export class TicketController {
     status: 401, 
     description: 'Não autorizado (Token inválido).' 
   })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Chamado não encontrado.'
+  })
   async remove(
     @Param('id') id: string, 
     @CurrentUser() user: User
@@ -150,6 +163,10 @@ export class TicketController {
   @ApiResponse({ 
     status: 401, 
     description: 'Não autorizado (Token inválido).' 
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Chamado não encontrado.'
   })
   async addComment(
     @Param('id') ticketId: string,
